@@ -159,6 +159,42 @@
 						  timer: 3000
 						})
 			}
+			function reject_connection()
+			{
+				console.log("connection request rejected");
+				Swal.fire({
+						  position: 'top-end',
+						  icon: 'warning',
+						  title: "Wallet Connect",
+						  text: "Connection request has been rejected by wallet",
+						  showConfirmButton: false,
+						  timer: 3000
+						})
+			}
+			function create_nft_collection(result)
+			{
+				console.log("create nft collection -> " + result);
+				Swal.fire({
+						  position: 'top-end',
+						  icon: 'warning',
+						  title: "Create NFT Collection",
+						  text: (result?"Success":"Rejected"),
+						  showConfirmButton: false,
+						  timer: 3000
+						})
+			}
+			function create_nft(result)
+			{
+				console.log("create nft -> " + result);
+				Swal.fire({
+						  position: 'top-end',
+						  icon: 'warning',
+						  title: "Create NFT",
+						  text: (result?"Success":"Rejected"),
+						  showConfirmButton: false,
+						  timer: 3000
+						})
+			}
 			function list_nft_collections(collections)
 			{
 				app.collections=collections;
