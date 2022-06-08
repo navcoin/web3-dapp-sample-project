@@ -1,0 +1,167 @@
+<html>
+	<head>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+		<script src="https://unpkg.com/vue@2"></script>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
+		<title>Web dAPP Sample Project</title>
+	</head>
+	<body>
+		<div class="container mt-3" id="app">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="card card-primary">
+						<div class="card-header">
+							Check Extension
+						</div>
+						<div class="card-body">
+							<div class="form-group">
+								Extension Installed : {{is_extension_installed}}
+							</div>
+							<div class="form-group">
+								Extension Version : {{version}}
+							</div>
+							<div class="form-group">
+								Connected : {{is_connected}}
+							</div>
+							<div class="form-group">
+								Address : {{address}}
+							</div>
+							<div class="form-group mt-3" v-if='!is_connected'>
+								<a class="btn btn-primary" v-on:click="connectWallet()">Connect</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="card card-primary">
+						<div class="card-header">
+							NFT
+						</div>
+						<div class="card-body">
+							<div v-if="is_connected">
+								<div class="form-group mt-3">
+									<a class="btn btn-primary" v-on:click="CreateNFTCollection()">Create NFT Collection</a>
+								</div>
+								<div class="form-group mt-3">
+									<a class="btn btn-primary" v-on:click="CreateNFT()">Create NFT</a>
+								</div>
+								<div class="form-group mt-3">
+									<a class="btn btn-primary" v-on:click="ListNFTCollections()">List NFT Collections</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-5">
+				<div class="col-md-12">
+					<div class="card card-primary">
+						<div class="card-header">
+							NFT
+						</div>
+						<div class="card-body">
+							<code>
+								{{collections}}
+							</code>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+			const event_on_wallet_connected = new Event('on_wallet_connected');
+			var app = new Vue({
+				el: '#app',
+				data:
+				{
+					is_extension_installed:false,
+					is_connected:false,
+					version:'',
+					address:undefined,
+					collections:{}
+				},
+				methods:
+				{
+					connectWallet: function()
+					{
+						window.postMessage({method: "connect"},"*");
+					},
+					CreateNFTCollection: function()
+					{
+						let scheme=JSON.stringify({
+						  "version": 1,
+						  "category": "",
+						  "description": "Collection Description",
+						  "image": "ipfs://QmUkqNpMQ5PX84YwMEhVArhfeiwajyihseXoEMh2K8b1PC",
+						  "external_url": "https://www.url.com",
+						  "attributes": {
+						    "thumbnail_url": "ipfs://QmUkqNpMQ5PX84YwMEhVArhfeiwajyihseXoEMh2K8b1PC",
+						    "content_type": "image/png"
+						  }
+						});
+						window.postMessage({method:"create_nft_collection",name:"Collection Name",scheme:scheme,max_supply:100},"*");
+					},
+					CreateNFT: function()
+					{
+						let scheme=JSON.stringify({
+						  "version": 1,
+						  "category": "art",
+						  "sub_category": null,
+						  "name": "NFT Name",
+						  "description": "NFT Description",
+						  "image": "ipfs://QmVVPLdohygxBfRmAuFgRsdDoCCWjG7L9w3pMmYrzkubcA",
+						  "external_url": "https://www.url.com/0",
+						  "attributes": 
+						  {
+						    "thumbnail_url": "ipfs://QmVVPLdohygxBfRmAuFgRsdDoCCWjG7L9w3pMmYrzkubcA",
+						    "content_type": "image/png",
+						    "family_id": "0"
+						  }
+						  });
+						window.postMessage({method:"create_nft",name:"NFT Name",scheme:scheme,nft_id:0},"*");
+					},
+					ListNFTCollections:function()
+					{
+						window.postMessage({method: "list_nft_collections"},"*");
+					}
+				}
+			});
+			window.addEventListener("message", (event) =>
+			{
+				if (event.data)
+				{
+					console.log(event);
+					if (event.data.type=="extension")
+					{
+						app.is_extension_installed=true;
+						app.version=event.data.version;
+						app.is_connected=event.data.connected;
+						app.address=event.data.address;
+						console.log('Extension version: ', event.data.version);
+						console.log('Is connected: ', event.data.connected);
+						console.log('Address : ', event.data.address);
+					}
+				}
+			}, true);
+			function accept_connection(address)
+			{
+				console.log("accept connection -> " + address);
+				app.address=address;
+				app.is_connected=true;
+				Swal.fire({
+						  position: 'top-end',
+						  icon: 'success',
+						  title: "Wallet Connect",
+						  text: "Connection request has been accepted",
+						  showConfirmButton: false,
+						  timer: 3000
+						})
+			}
+			function list_nft_collections(collections)
+			{
+				app.collections=collections;
+			}
+	</script>
+</html>
