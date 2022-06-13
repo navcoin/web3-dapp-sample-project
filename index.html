@@ -3,7 +3,7 @@
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 		<script src="https://unpkg.com/vue@2"></script>
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
-		<script src="web3.js"></script>
+		<script src="web3.js?a=1"></script>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
 		<title>Navcoin Web3 dApp - Sample Project</title>
 	</head>
@@ -69,12 +69,93 @@
 					</div>
 				</div>
 			</div>
+			<div class="row mt-5">
+				<div class="col-md-6">
+					<div class="card card-primary">
+						<div class="card-header">
+							Crate Private Token
+						</div>
+						<div class="card-body">
+							<div v-if="is_connected">
+								<div class="form-group mt-3">
+									<a class="btn btn-primary" v-on:click="CreatePrivateToken()">Create Private Token</a>
+								</div>
+								<div class="form-group" v-if="tx">
+									<h5>Transaction Hash</h5>
+									{{private_token_tx.hashes[0]}}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="card card-primary">
+						<div class="card-header">
+							Mint Private Token
+						</div>
+						<div class="card-body">
+							<div v-if="is_connected">
+								<div class="form-group mt-3">
+									Token ID : <input type="text" class="form-control" v-model="token_id"/>
+								</div>
+								<div class="form-group mt-3">
+									<a class="btn btn-primary" v-on:click="MintPrivateToken()">Mint Private Token</a>
+								</div>
+								<div class="form-group" v-if="tx">
+									<h5>Transaction Hash</h5>
+									{{private_token_tx.hashes[0]}}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-5">
+				<div class="col-md-6">
+					<div class="card card-primary">
+						<div class="card-header">
+							Transaction
+						</div>
+						<div class="card-body">
+							<div v-if="is_connected">
+								<div class="form-group mt-3">
+									<a class="btn btn-primary" v-on:click="CreateTransaction()">Create Transaction</a>
+								</div>
+								<div class="form-group" v-if="tx">
+									<h5>Transaction Hash</h5>
+									{{tx.hashes[0]}}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="card card-primary">
+						<div class="card-header">
+							Message
+						</div>
+						<div class="card-body">
+							<div v-if="is_connected">
+								<div class="form-group mt-3">
+									<a class="btn btn-primary" v-on:click="SignMessage()">Sign Message</a>
+								</div>
+								<div class="form-group" v-if="signed_message">
+									<h5>Signed Message</h5>
+									<code>{{signed_message}}</code>
+									<h5>Address</h5>
+									<code>{{signed_address}}</code>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</body>
 	<script>
 		var Web3 = new Web3SDK({
 			"network":"testnet",
-			"log":false
+			"log":true
 		});
 		var app = new Vue({
 			el: '#app',
@@ -84,6 +165,11 @@
 				is_connected:false,
 				version:'',
 				address:undefined,
+				signed_message:undefined,
+				signed_address:undefined,
+				tx:undefined,
+				private_token_tx:undefined,
+				token_id:'',
 				collections:{}
 			},
 			methods:
@@ -130,9 +216,34 @@
 					}
 					});
 					Web3.CreateNft({
-						scheme:scheme,
-						nft_id:0
+						token_id:"f0006b0eb29b3b7e6306212ad6b105d4a362300d98f68613139a97bcde90ac42",
+						nft_id:0,
+						scheme:scheme
 					});
+				},
+				CreateTransaction:function()
+				{
+					let address="xNTVnRrBYbkYABv4kXN6CsYkdQFSDZdMvFXPcPTG3AYwYB1CR45iuiDgHYtNBXPjHdpYA4CMtAsuJh9SDU1SDQAeMWuUYsPM9eFfD9KhMDwastyeGZiBQw9ZcdKb18hHMvC2Z97mwa4";
+					let amount=1;
+					Web3.CreateTransaction({address:address,amount:amount});
+				},
+				CreatePrivateToken:function()
+				{
+					let name="XLI Token";
+					let symbol="XLI";
+					let max_supply=100000000;
+					Web3.CreatePrivateToken({name:name,symbol:symbol,max_supply:max_supply});
+				},
+				MintPrivateToken:function()
+				{
+					let token_id=this.token_id;
+					let amount="1000";
+					Web3.MintPrivateToken({token_id:token_id,amount:amount});
+				},
+				SignMessage:function()
+				{
+					let message="this is the message!";
+					Web3.SignMessage({message:message});
 				},
 				ListNFTCollections:function()
 				{
@@ -140,7 +251,6 @@
 				}
 			}
 		});
-		
 		window.addEventListener("sdk_loaded", function(e)
 		{
 			console.log("Navcoin Web3 SDK loaded on ", e.detail.network);
@@ -161,53 +271,159 @@
 			app.address=address;
 			app.is_connected=true;
 			Swal.fire({
-						position: 'top-end',
-						icon: 'success',
-						title: "Wallet Connect",
-						text: "Connection request has been accepted",
-						showConfirmButton: false,
-						timer: 3000
-					})
+				position: 'top-end',
+				icon: 'success',
+				title: "Wallet Connect",
+				text: "Connection request has been accepted",
+				showConfirmButton: false,
+				timer: 3000
+			})
 		}
 		function reject_connection()
 		{
 			console.log("connection request rejected");
 			Swal.fire({
-						position: 'top-end',
-						icon: 'warning',
-						title: "Wallet Connect",
-						text: "Connection request has been rejected by wallet",
-						showConfirmButton: false,
-						timer: 3000
-					})
+				position: 'top-end',
+				icon: 'warning',
+				title: "Wallet Connect",
+				text: "Connection request has been rejected by wallet",
+				showConfirmButton: false,
+				timer: 3000
+			})
 		}
 		function create_nft_collection(result)
 		{
 			console.log("create nft collection -> " + result);
 			Swal.fire({
-						position: 'top-end',
-						icon: 'warning',
-						title: "Create NFT Collection",
-						text: (result?"Success":"Rejected"),
-						showConfirmButton: false,
-						timer: 3000
-					})
+				position: 'top-end',
+				icon: 'warning',
+				title: "Create NFT Collection",
+				text: (result?"Success":"Rejected"),
+				showConfirmButton: false,
+				timer: 3000
+			})
 		}
 		function create_nft(result)
 		{
 			console.log("create nft -> " + result);
 			Swal.fire({
-						position: 'top-end',
-						icon: 'warning',
-						title: "Create NFT",
-						text: (result?"Success":"Rejected"),
-						showConfirmButton: false,
-						timer: 3000
-					})
+				position: 'top-end',
+				icon: 'warning',
+				title: "Create NFT",
+				text: (result?"Success":"Rejected"),
+				showConfirmButton: false,
+				timer: 3000
+			})
 		}
 		function list_nft_collections(collections)
 		{
 			app.collections=collections;
+		}
+		function accept_create_transaction(tx)
+		{
+			console.log("accept create transaction");
+			console.log(tx);
+			app.tx=tx;
+			Swal.fire({
+				position: 'top-end',
+				icon: 'success',
+				title: "Transaction",
+				text: "Transaction request accepted",
+				showConfirmButton: false,
+				timer: 3000
+			})
+		}
+		function reject_create_transaction()
+		{
+			console.log("transaction request rejected");
+			Swal.fire({
+				position: 'top-end',
+				icon: 'warning',
+				title: "Transaction",
+				text: "Transaction request rejected",
+				showConfirmButton: false,
+				timer: 3000
+			})
+		}
+		function accept_create_private_token(private_token_tx)
+		{
+			console.log("accept create private token");
+			console.log(tx);
+			app.private_token_tx=private_token_tx;
+			Swal.fire({
+				position: 'top-end',
+				icon: 'success',
+				title: "Create Private Token",
+				text: "Create private token request accepted",
+				showConfirmButton: false,
+				timer: 3000
+			})
+		}
+		function reject_create_private_token()
+		{
+			console.log("create private token request rejected");
+			Swal.fire({
+				position: 'top-end',
+				icon: 'warning',
+				title: "Create Private Token",
+				text: "Create private token request rejected",
+				showConfirmButton: false,
+				timer: 3000
+			})
+		}
+		function accept_mint_private_token(private_token_tx)
+		{
+			console.log("mint create private token");
+			console.log(tx);
+			app.private_token_tx=private_token_tx;
+			Swal.fire({
+				position: 'top-end',
+				icon: 'success',
+				title: "Mint Private Token",
+				text: "Mint private token request accepted",
+				showConfirmButton: false,
+				timer: 3000
+			})
+		}
+		function reject_mint_private_token()
+		{
+			console.log("mint private token request rejected");
+			Swal.fire({
+				position: 'top-end',
+				icon: 'warning',
+				title: "Mint Private Token",
+				text: "Mint private token request rejected",
+				showConfirmButton: false,
+				timer: 3000
+			})
+		}		
+		function accept_sign_message(signed_message,address)
+		{
+			console.log("accept sign message");
+			console.log(signed_message);
+			console.log(address);
+			app.signed_message=signed_message;
+			app.signed_address=address;
+			Swal.fire({
+				position: 'top-end',
+				icon: 'success',
+				title: "Sign Message",
+				text: "Sign message request accepted",
+				showConfirmButton: false,
+				timer: 3000
+			})
+		}
+		function reject_sign_message()
+		{
+			console.log("sign message request rejected");
+			Swal.fire({
+				position: 'top-end',
+				icon: 'warning',
+				title: "Sign Message",
+				text: "Sign message request rejected",
+				showConfirmButton: false,
+				timer: 3000
+			})
 		}
 	</script>
 </html>

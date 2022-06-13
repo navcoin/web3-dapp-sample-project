@@ -42,15 +42,41 @@ class Web3SDK
   {
     this.Log("CreateNft");
     this.Log(param);
-    this.RequestToWallet({method:"create_nft",scheme:param.scheme,nft_id:param.nft_id});
+    this.RequestToWallet({method:"create_nft",token_id:param.token_id,nft_id:param.nft_id,scheme:param.scheme});
   }
   async ListNftCollections()
   {
     this.Log("ListNftCollections");
     this.RequestToWallet({method: "list_nft_collections"});
   }
+  async CreatePrivateToken(param)
+  {
+    this.Log("CreatePrivateToken");
+    this.Log(param);
+    this.RequestToWallet({method:"create_private_token",name:param.name,symbol:param.symbol,max_supply:param.max_supply});
+  }
+  async MintPrivateToken(param)
+  {
+    this.Log("MintPrivateToken");
+    this.Log(param);
+    this.RequestToWallet({method:"mint_private_token",token_id:param.token_id,amount:param.amount});
+  }
+  async CreateTransaction(param)
+  {
+    this.Log("CreateTransaction");
+    this.Log(param);
+    this.RequestToWallet({method:"create_transaction",address:param.address,amount:param.amount});
+  }
+  async SignMessage(param)
+  {
+    this.Log("SignMessage");
+    this.Log(param);
+    this.RequestToWallet({method:"sign_message",message:param.message});
+  }
   async RequestToWallet(param)
   {
+    param.network=this.network;
+    this.Log(param);
     window.postMessage(param,"*");
   }
   async Log(o)
