@@ -44,6 +44,24 @@ class Web3SDK
     this.Log(param);
     this.RequestToWallet({method:"create_nft",token_id:param.token_id,nft_id:param.nft_id,scheme:param.scheme});
   }
+  async CreateNftSellOrder(param)
+  {
+    this.Log("createNftSellOrder");
+    this.Log(param);
+    this.RequestToWallet({method:"create_nft_sell_order",return_order:param.return_order,submit_order:param.submit_order,api_url:param.api_url,token_id:param.token_id,nft_id:param.nft_id,price:param.price});
+  }
+  async CancelNftSellOrder(param)
+  {
+    this.Log("CancelNftSellOrder");
+    this.Log(param);
+    this.RequestToWallet({method:"cancel_nft_sell_order",token_id:param.token_id,nft_id:param.nft_id});
+  }
+  async AcceptOrder(param)
+  {
+    this.Log("AcceptOrder");
+    this.Log(param);
+    this.RequestToWallet({method:"accept_order",order:param.order});
+  }
   async ListNftCollections()
   {
     this.Log("ListNftCollections");

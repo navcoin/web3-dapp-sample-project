@@ -229,8 +229,8 @@
 				},
 				CreatePrivateToken:function()
 				{
-					let name="XLI Token";
-					let symbol="XLI";
+					let name="XSI Token";
+					let symbol="XSI";
 					let max_supply=100000000;
 					Web3.CreatePrivateToken({name:name,symbol:symbol,max_supply:max_supply});
 				},
@@ -348,7 +348,7 @@
 		function accept_create_private_token(private_token_tx)
 		{
 			console.log("accept create private token");
-			console.log(tx);
+			console.log(private_token_tx);
 			app.private_token_tx=private_token_tx;
 			Swal.fire({
 				position: 'top-end',
@@ -374,7 +374,7 @@
 		function accept_mint_private_token(private_token_tx)
 		{
 			console.log("mint create private token");
-			console.log(tx);
+			console.log(private_token_tx);
 			app.private_token_tx=private_token_tx;
 			Swal.fire({
 				position: 'top-end',
